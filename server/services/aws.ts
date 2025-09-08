@@ -18,7 +18,11 @@ export class AwsService {
   }
 
   async initializeWithRole(roleConfig: RoleAssumption): Promise<AwsCredentials> {
-    const stsClient = new STSClient({ region: roleConfig.region });
+    // For role assumption, we need initial credentials from environment or instance profile
+    const stsClient = new STSClient({ 
+      region: roleConfig.region,
+      // This will use default credential provider chain (env vars, instance profile, etc.)
+    });
     
     const command = new AssumeRoleCommand({
       RoleArn: roleConfig.roleArn,
@@ -121,6 +125,20 @@ export class AwsService {
     const command = new DeleteObjectCommand({
       Bucket: bucketName,
       Key: key,
+    });
+
+    await this.s3Client.send(command);
+  }
+
+  async uploadObject(bucketName: string, key: string, body: Buffer | Uint8Array | string): Promise<void> {
+    if (!this.s3Client) {
+      throw new Error('AWS client not initialized');
+    }
+
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      Body: body,
     });
 
     await this.s3Client.send(command);

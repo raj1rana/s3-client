@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import cookieSession from "cookie-session";
+import multer from "multer";
 import { storage } from "./storage";
 import { awsService } from "./services/aws";
 import { awsCredentialsSchema, roleAssumptionSchema } from "@shared/schema";
@@ -15,6 +16,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict'
   }));
+
+  // Configure multer for file uploads
+  const upload = multer({ storage: multer.memoryStorage() });
 
   // Connect with access keys
   app.post('/api/connect/credentials', async (req, res) => {
@@ -39,13 +43,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const roleConfig = roleAssumptionSchema.parse(req.body);
       
+      console.log('Attempting to assume role:', roleConfig.roleArn);
       const credentials = await awsService.initializeWithRole(roleConfig);
+      console.log('Role assumed successfully');
       
       const session = await storage.createSession(credentials);
       req.session!.sessionId = session.id;
       
       res.json({ success: true, sessionId: session.id });
     } catch (error) {
+      console.error('Role assumption failed:', error);
       res.status(400).json({ 
         error: error instanceof Error ? error.message : 'Failed to assume role' 
       });
@@ -185,6 +192,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ 
         error: error instanceof Error ? error.message : 'Failed to delete object' 
+      });
+    }
+  });
+
+  // Upload object
+  app.post('/api/buckets/:bucketName/upload', upload.single('file'), async (req, res) => {
+    try {
+      const sessionId = req.session?.sessionId;
+      if (!sessionId) {
+        return res.status(401).json({ error: 'Not connected' });
+      }
+
+      const session = await storage.getSession(sessionId);
+      if (!session) {
+        return res.status(401).json({ error: 'Invalid session' });
+      }
+
+      const { bucketName } = req.params;
+      const { key } = req.body;
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ error: 'No file provided' });
+      }
+
+      if (!key) {
+        return res.status(400).json({ error: 'No key provided' });
+      }
+
+      await awsService.initializeWithCredentials(session.credentials);
+      await awsService.uploadObject(bucketName, key, file.buffer);
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Failed to upload object' 
       });
     }
   });

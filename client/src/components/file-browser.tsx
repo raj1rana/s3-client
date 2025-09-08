@@ -36,7 +36,17 @@ export default function FileBrowser({ selectedBucket, currentPath, onPathChange,
   const queryClient = useQueryClient();
 
   const { data: objects = [], isLoading, refetch } = useQuery<S3Object[]>({
-    queryKey: ['/api/buckets', selectedBucket, 'objects', `?prefix=${encodeURIComponent(currentPath)}`],
+    queryKey: ['/api/buckets', selectedBucket, 'objects'],
+    queryFn: async () => {
+      const url = currentPath 
+        ? `/api/buckets/${selectedBucket}/objects?prefix=${encodeURIComponent(currentPath)}`
+        : `/api/buckets/${selectedBucket}/objects`;
+      const response = await fetch(url, { credentials: 'include' });
+      if (!response.ok) {
+        throw new Error(`${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
     enabled: !!selectedBucket,
   });
 
