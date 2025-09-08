@@ -111,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // List objects in bucket
-  app.get('/api/buckets/:bucketName/objects', async (req, res) => {
+  app.get('/api/buckets/:bucketName/objects*', async (req, res) => {
     try {
       const sessionId = req.session?.sessionId;
       if (!sessionId) {

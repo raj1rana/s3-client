@@ -36,8 +36,7 @@ export default function FileBrowser({ selectedBucket, currentPath, onPathChange,
   const queryClient = useQueryClient();
 
   const { data: objects = [], isLoading, refetch } = useQuery<S3Object[]>({
-    queryKey: ['/api/buckets', selectedBucket, 'objects'],
-    queryParams: { prefix: currentPath },
+    queryKey: ['/api/buckets', selectedBucket, 'objects', `?prefix=${encodeURIComponent(currentPath)}`],
     enabled: !!selectedBucket,
   });
 
@@ -172,7 +171,7 @@ export default function FileBrowser({ selectedBucket, currentPath, onPathChange,
     }
   };
 
-  const filteredObjects = objects.filter(obj => 
+  const filteredObjects = objects.filter((obj: S3Object) => 
     searchTerm === "" || obj.key.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -279,7 +278,7 @@ export default function FileBrowser({ selectedBucket, currentPath, onPathChange,
               <p className="text-sm text-muted-foreground">No files found</p>
             </div>
           ) : (
-            filteredObjects.map((object) => {
+            filteredObjects.map((object: S3Object) => {
               const { icon: Icon, color } = getFileIcon(object.key, object.isFolder);
               const displayName = object.isFolder 
                 ? object.key.split('/').filter(Boolean).pop() || object.key
