@@ -27,6 +27,7 @@ export default function ConnectionManager() {
   const [accessKeyId, setAccessKeyId] = useState("");
   const [secretAccessKey, setSecretAccessKey] = useState("");
   const [roleArn, setRoleArn] = useState("");
+  const [sessionName, setSessionName] = useState("");
   const [region, setRegion] = useState("us-east-1");
   
   const { toast } = useToast();
@@ -49,6 +50,7 @@ export default function ConnectionManager() {
         return apiRequest('POST', '/api/connect/role', {
           roleArn,
           region,
+          sessionName: sessionName || undefined,
         });
       }
     },
@@ -81,6 +83,7 @@ export default function ConnectionManager() {
       setAccessKeyId("");
       setSecretAccessKey("");
       setRoleArn("");
+      setSessionName("");
     },
   });
 
@@ -174,6 +177,17 @@ export default function ConnectionManager() {
                     onChange={(e) => setRoleArn(e.target.value)}
                     className="mt-1 font-mono text-sm"
                     data-testid="input-role-arn"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs font-medium text-muted-foreground">Session Name</Label>
+                  <Input
+                    type="text"
+                    placeholder="S3ClientSession"
+                    value={sessionName}
+                    onChange={(e) => setSessionName(e.target.value)}
+                    className="mt-1 text-sm"
+                    data-testid="input-session-name"
                   />
                 </div>
               </div>
