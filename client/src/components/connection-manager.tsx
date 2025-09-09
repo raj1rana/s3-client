@@ -170,8 +170,9 @@ export default function ConnectionManager() {
               <div className="space-y-3">
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">
-                    Role assumption uses AWS environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) 
-                    for initial authentication.
+                    <strong>Role assumption requires:</strong><br/>
+                    • AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in Replit Secrets<br/>
+                    • These are used for initial authentication before assuming the target role
                   </p>
                 </div>
                 <div>

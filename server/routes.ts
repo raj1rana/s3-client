@@ -41,6 +41,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Connect with role assumption
   app.post('/api/connect/role', async (req, res) => {
     try {
+      // Check if AWS credentials are available in environment
+      if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+        return res.status(400).json({ 
+          error: 'AWS environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) are required for role assumption. Please set them in Replit Secrets.' 
+        });
+      }
+
       const roleConfig = roleAssumptionSchema.parse(req.body);
       
       console.log('Attempting to assume role:', roleConfig.roleArn);
