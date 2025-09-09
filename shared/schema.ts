@@ -11,6 +11,10 @@ export const roleAssumptionSchema = z.object({
   roleArn: z.string().min(1, "Role ARN is required"),
   region: z.string().min(1, "Region is required"),
   sessionName: z.string().optional(),
+  // Initial credentials needed to assume the role
+  accessKeyId: z.string().min(1, "Access Key ID is required for role assumption"),
+  secretAccessKey: z.string().min(1, "Secret Access Key is required for role assumption"),
+  sessionToken: z.string().optional(),
 });
 
 export const s3ObjectSchema = z.object({

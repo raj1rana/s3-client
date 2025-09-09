@@ -28,10 +28,14 @@ export class AwsService {
     try {
       logAwsOperation('assume_role_start', { roleArn: roleConfig.roleArn, sessionName: roleConfig.sessionName }, true);
       
-      // For role assumption, we need initial credentials from environment or instance profile
+      // Create STS client with provided initial credentials
       const stsClient = new STSClient({ 
         region: roleConfig.region,
-        // This will use default credential provider chain (env vars, instance profile, etc.)
+        credentials: {
+          accessKeyId: roleConfig.accessKeyId,
+          secretAccessKey: roleConfig.secretAccessKey,
+          sessionToken: roleConfig.sessionToken,
+        }
       });
       
       const command = new AssumeRoleCommand({
