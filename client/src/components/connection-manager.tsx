@@ -30,10 +30,6 @@ export default function ConnectionManager() {
   const [sessionName, setSessionName] = useState("");
   const [region, setRegion] = useState("us-east-1");
   
-  // For role assumption, we also need initial credentials
-  const [roleAccessKeyId, setRoleAccessKeyId] = useState("");
-  const [roleSecretAccessKey, setRoleSecretAccessKey] = useState("");
-  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -55,8 +51,6 @@ export default function ConnectionManager() {
           roleArn,
           region,
           sessionName: sessionName || undefined,
-          accessKeyId: roleAccessKeyId,
-          secretAccessKey: roleSecretAccessKey,
         });
       }
     },
@@ -90,8 +84,6 @@ export default function ConnectionManager() {
       setSecretAccessKey("");
       setRoleArn("");
       setSessionName("");
-      setRoleAccessKeyId("");
-      setRoleSecretAccessKey("");
     },
   });
 
@@ -176,27 +168,11 @@ export default function ConnectionManager() {
               </div>
             ) : (
               <div className="space-y-3">
-                <div>
-                  <Label className="text-xs font-medium text-muted-foreground">Initial Access Key ID</Label>
-                  <Input
-                    type="text"
-                    placeholder="AKIAIOSFODNN7EXAMPLE"
-                    value={roleAccessKeyId}
-                    onChange={(e) => setRoleAccessKeyId(e.target.value)}
-                    className="mt-1 font-mono text-sm"
-                    data-testid="input-role-access-key-id"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs font-medium text-muted-foreground">Initial Secret Access Key</Label>
-                  <Input
-                    type="password"
-                    placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-                    value={roleSecretAccessKey}
-                    onChange={(e) => setRoleSecretAccessKey(e.target.value)}
-                    className="mt-1 font-mono text-sm"
-                    data-testid="input-role-secret-access-key"
-                  />
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="text-xs text-muted-foreground">
+                    Role assumption uses AWS environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) 
+                    for initial authentication.
+                  </p>
                 </div>
                 <div>
                   <Label className="text-xs font-medium text-muted-foreground">Role ARN</Label>
